@@ -1,0 +1,166 @@
+openapi: 3.0.0
+info:
+  title: Quest Booking API
+  version: "1.0.0"
+
+servers:
+  - url: http://localhost
+
+paths:
+
+  /auth/register:
+    post:
+      summary: Регистрация пользователя
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, phone, email, password_hash]
+              properties:
+                name:
+                  type: string
+                phone:
+                  type: string
+                email:
+                  type: string
+                password_hash:
+                  type: string
+      responses:
+        '200':
+          description: Результат регистрации
+
+  /auth/login:
+    post:
+      summary: Авторизация пользователя
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password_hash]
+              properties:
+                email:
+                  type: string
+                password_hash:
+                  type: string
+      responses:
+        '200':
+          description: Успешный вход (возвращает access_token)
+
+  /quests:
+    get:
+      summary: Список всех квестов
+      tags:
+        - Quests
+      responses:
+        '200':
+          description: OK
+
+  /quest/{id}:
+    get:
+      summary: Получить данные одного квеста
+      tags:
+        - Quests
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+
+  /quest-slots/{id}:
+    get:
+      summary: Получить слоты квеста по дате
+      security:
+        - BearerAuth: []
+      tags:
+        - Slots
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: date
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK
+
+  /reserve/{id}:
+    post:
+      summary: Забронировать слот
+      security:
+        - BearerAuth: []
+      tags:
+        - Booking
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [date, time]
+              properties:
+                date:
+                  type: string
+                time:
+                  type: string
+      responses:
+        '200':
+          description: Результат бронирования
+
+  /bookings:
+    get:
+      summary: Все бронирования пользователя
+      security:
+        - BearerAuth: []
+      tags:
+        - Booking
+      responses:
+        '200':
+          description: OK
+
+  /booking-cancel/{id}:
+    post:
+      summary: Отмена бронирования
+      security:
+        - BearerAuth: []
+      tags:
+        - Booking
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Результат отмены
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
